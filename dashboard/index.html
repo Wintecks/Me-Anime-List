@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="60">
+    <title>DashBoard</title>
+    <link rel="stylesheet" href="index.css">
+    <script type="module" src="/tilewindow.js"></script>
+    
+</head>
+<body>
+    <div class="header">
+        <a class="headertext">
+            <span style="color: #238636;">D</span>ash<span style="color: #238636;">b</span>oard
+        </a>
+        <button id="opentilewindowbtn" class="btn"> + </button>
+    </div>
+    
+    <div class="bodybox" id="bodybox">
+        <a href="" class="tilecard">
+            <h4>${tile.title}</h4>
+            <p>${tile.desc || ''}</p>
+        </a>
+    </div>
+    <div class="tilewindow" id="tilewindow">
+        <div class="tilewindow_content">
+            <div class="tilewindow_header">
+                <h3><span style="color: #238636;">T</span>ile <span style="color: #238636;">c</span>reator</h3>
+                <button class="tilewindow_btnclose" id="tilewindow_btnclose">&times;</button>
+            </div>
+            <form class="tilewindow_form" id="tilewindow_form">
+                <div class="tilewindow_formgroup">
+                    <label for="tilewindow_tiletitle">Заголовок</label>
+                    <input type="text" id="tilewindow_tiletitle" placeholder="Назва плитки">
+                </div>
+                <div class="tilewindow_formgroup">
+                    <label for="tilewindow_tiledesc">Опис</label>
+                    <textarea id="tilewindow_tiledesc" rows="3" placeholder="Коротки опис плитки..."></textarea>
+                </div>
+                <div class="tilewindow_formgroup">
+                    <label for="tilewindow_tileurl">Посилання</label>
+                    <input type="url" id="tilewindow_tileurl" placeholder="Посилання на ресурс">
+                </div>
+                <div class="tilewindow_action">
+                    <button type="button" class="btn redbtn" id="tilewindow_btncencle">Clence</button>
+                    <button type="submit" class="btn">Add tile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

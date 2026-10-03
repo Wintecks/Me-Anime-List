@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Controller</title>
+
+  <!-- Динамічний Favicon (початкова іконка) -->
+  <link id="favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%237952b3'/><rect x='33' y='28' width='12' height='44' rx='3' fill='white'/><rect x='55' y='28' width='12' height='44' rx='3' fill='white'/></svg>">
+
+  <!-- Скрипт проти блимання: виконується МИТТЄВО до рендеру сторінки -->
+  <script>
+    (function() {
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      }
+
+      let savedTheme = getCookie('app_theme');
+      
+      if (!savedTheme) {
+        savedTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      }
+
+      if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-theme');
+      }
+    })();
+  </script>
+
+  <style>
+    :root {
+      --bg: #121214;
+      --card-bg: #1e1e24;
+      --accent: #7952b3;
+      --text: #f0f0f5;
+      --text-dim: #a0a0b0;
+      --radius: 16px;
+      --input-bg: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.12);
+      --status-online: #2ecc71;
+      --status-offline: #e74c3c;
+    }
+
+    html.light-theme,
+    body.light-theme {
+      --bg: #f2f2f7;
+      --card-bg: #ffffff;
+      --accent: #7952b3;
+      --text: #1c1c1e;
+      --text-dim: #6c6c70;
+      --input-bg: rgba(0, 0, 0, 0.05);
+      --border: rgba(0, 0, 0, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .player-card {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 380px;
+      padding: 28px;
+      border-radius: var(--radius);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: background-color 0.3s;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--status-offline);
+      transition: background-color 0.3s;
+    }
+
+    .status-dot.online {
+      background-color: var(--status-online);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .theme-toggle-btn {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .theme-toggle-btn:hover {
+      background: rgba(121, 82, 179, 0.2);
+    }
+
+    .theme-toggle-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .player-select {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      max-width: 140px;
+    }
+
+    .player-select option {
+      background-color: var(--card-bg);
+      color: var(--text);
+    }
+
+    .track-info {
+      text-align: center;
+    }
+
+    .track-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .track-artist {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn {
+      background: var(--input-bg);
+      border: none;
+      color: var(--text);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:hover {
+      background: rgba(121, 82, 179, 0.2);
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-main {
+      width: 60px;
+      height: 60px;
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-main:hover {
+      background: #8b62cc;
+    }
+
+    .btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .btn-main svg {
+      width: 26px;
+      height: 26px;
+      fill: #ffffff;
+    }
+
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .volume-container svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--text-dim);
+    }
+
+    .volume-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--input-bg);
+      outline: none;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    .volume-val {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      width: 32px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="player-card">
+    <div class="header-bar">
+      <div class="status-indicator">
+        <span id="statusDot" class="status-dot"></span>
+        <span id="statusText">Відключено</span>
+      </div>
+
+      <div class="header-actions">
+        <button id="themeToggle" class="theme-toggle-btn" title="Змінити тему">
+          <!-- Сонце -->
+          <svg id="sunIcon" viewBox="0 0 24 24" style="display: none;">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <!-- Місяць -->
+          <svg id="moonIcon" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <select id="playerSelect" class="player-select" title="Обрати плеєр">
+          <option value="auto">Автоматично</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="track-info">
+      <div id="trackTitle" class="track-title">Нічого не відтворюється</div>
+      <div id="trackArtist" class="track-artist">—</div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="btnPrev" title="Попередній трек">
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+      </button>
+
+      <button class="btn btn-main" id="btnPlayPause" title="Відтворення / Пауза">
+        <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="pauseIcon" viewBox="0 0 24 24" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+
+      <button class="btn" id="btnNext" title="Наступний трек">
+        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+      </button>
+    </div>
+
+    <div class="volume-container">
+      <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+      <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="50">
+      <span id="volumeValue" class="volume-val">50%</span>
+    </div>
+  </div>
+
+  <script>
+    const WS_URL = `ws://192.168.1.108:8337/ws/client`;
+
+    let ws = null;
+    let isPlaying = false;
+    let selectedPlayer = 'auto';
+
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    let currentTheme = getCookie('app_theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const trackTitle = document.getElementById('trackTitle');
+    const trackArtist = document.getElementById('trackArtist');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeValue = document.getElementById('volumeValue');
+    const themeToggle = document.getElementById('themeToggle');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+    const playerSelect = document.getElementById('playerSelect');
+    const favicon = document.getElementById('favicon');
+
+    applyTheme(currentTheme, false);
+
+    function updateFavicon(playing) {
+      // Динамічна генерація SVG-іконки для вкладки
+      const iconSvg = playing 
+        ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="%237952b3"/><polygon points="38,28 75,50 38,72" fill="white"/></svg>`
+        : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="%237952b3"/><rect x="33" y="28" width="12" height="44" rx="3" fill="white"/><rect x="55" y="28" width="12" height="44" rx="3" fill="white"/></svg>`;
+
+      favicon.href = `data:image/svg+xml;utf8,${iconSvg}`;
+    }
+
+    function setStatus(online, text) {
+      if (online) {
+        statusDot.classList.add('online');
+      } else {
+        statusDot.classList.remove('online');
+      }
+      statusText.textContent = text;
+    }
+
+    function connectWebSocket() {
+      setStatus(false, 'Підключення...');
+      ws = new WebSocket(WS_URL);
+
+      ws.onopen = () => {
+        setStatus(true, 'Підключено');
+      };
+
+      ws.onclose = () => {
+        setStatus(false, 'Відключено');
+        setTimeout(connectWebSocket, 3000);
+      };
+
+      ws.onerror = (err) => {
+        console.error('WebSocket Error:', err);
+        setStatus(false, 'Помилка');
+        ws.close();
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          if (data.type === 'init_config') {
+            if (data.theme && data.theme !== currentTheme) {
+              applyTheme(data.theme, false);
+            }
+            selectedPlayer = data.selected_player || 'auto';
+            if (data.media_state) updateUI(data.media_state);
+          } 
+          else if (data.type === 'theme_changed') {
+            applyTheme(data.theme, false);
+          }
+          else if (data.type === 'player_changed') {
+            selectedPlayer = data.selected_player;
+            playerSelect.value = selectedPlayer;
+          }
+          else if (data.type === 'state_update') {
+            updateUI(data);
+          }
+        } catch (e) {
+          console.error('Помилка парсингу JSON:', e);
+        }
+      };
+    }
+
+    function applyTheme(theme, saveToServer = true) {
+      currentTheme = theme;
+      document.cookie = `app_theme=${theme}; path=/; max-age=31536000; SameSite=Lax`;
+
+      if (theme === 'light') {
+        document.documentElement.classList.add('light-theme');
+        document.body.classList.add('light-theme');
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+      } else {
+        document.documentElement.classList.remove('light-theme');
+        document.body.classList.remove('light-theme');
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+      }
+
+      if (saveToServer) {
+        sendCommand('set_theme', theme);
+      }
+    }
+
+    function updateUI(data) {
+      const currentTitle = data.title || trackTitle.textContent;
+      const currentArtist = data.artist !== undefined ? data.artist : trackArtist.textContent;
+
+      if (data.title) trackTitle.textContent = data.title;
+      if (data.artist !== undefined) trackArtist.textContent = data.artist || 'Невідомий виконавець';
+
+      if (typeof data.is_playing === 'boolean') {
+        isPlaying = data.is_playing;
+        playIcon.style.display = isPlaying ? 'none' : 'block';
+        pauseIcon.style.display = isPlaying ? 'block' : 'none';
+
+        // 1. Оновлення іконки вкладки
+        updateFavicon(isPlaying);
+
+        // 2. Оновлення заголовку вкладки без додаткових значків
+        const displayTitle = (currentTitle && currentTitle !== 'Нічого не відтворюється') 
+          ? `${currentTitle} - ${currentArtist || ''}` 
+          : 'Media Controller';
+        
+        document.title = displayTitle;
+      }
+
+      if (typeof data.volume === 'number') {
+        if (document.activeElement !== volumeSlider) {
+          volumeSlider.value = data.volume;
+          volumeValue.textContent = `${Math.round(data.volume)}%`;
+        }
+      }
+
+      if (Array.isArray(data.available_players)) {
+        updatePlayerOptions(data.available_players);
+      }
+    }
+
+    function updatePlayerOptions(players) {
+      const current = selectedPlayer;
+      playerSelect.innerHTML = '<option value="auto">Автоматично</option>';
+      
+      players.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p.replace('org.mpris.MediaPlayer2.', '');
+        if (p === current) opt.selected = true;
+        playerSelect.appendChild(opt);
+      });
+      
+      playerSelect.value = current;
+    }
+
+    function sendCommand(action, value = null) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        const payload = { action };
+        if (value !== null) payload.value = value;
+        ws.send(JSON.stringify(payload));
+      }
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(newTheme, true);
+    });
+
+    playerSelect.addEventListener('change', (e) => {
+      selectedPlayer = e.target.value;
+      sendCommand('select_player', selectedPlayer);
+    });
+
+    document.getElementById('btnPlayPause').addEventListener('click', () => {
+      sendCommand('play_pause');
+    });
+
+    document.getElementById('btnNext').addEventListener('click', () => {
+      sendCommand('next');
+    });
+
+    document.getElementById('btnPrev').addEventListener('click', () => {
+      sendCommand('previous');
+    });
+
+    volumeSlider.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      volumeValue.textContent = `${val}%`;
+      sendCommand('set_volume', val);
+    });
+
+    connectWebSocket();
+  </script>
+</body>
+</html>

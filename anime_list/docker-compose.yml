@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  anime-list:
+    build: .
+    container_name: anime_list
+    restart: always
+    ports:
+      - "8099:80"
