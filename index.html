@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Anime list</title>
+  <title>Anime List</title>
   <style>
     :root {
       --bg: #090d16;
@@ -130,19 +130,57 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
       font-size: 0.75rem;
       color: var(--text-muted);
     }
 
-    .card-badge {
-      font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 6px;
-      background: rgba(99, 102, 241, 0.15);
-      color: #a5b4fc;
+    .badge-group {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
-    /* Модальне вікно */
+    /* Плашки */
+    .card-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.54rem;
+      border-radius: 6px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    /* Anitube — Синій */
+    .badge-anitube {
+      background: rgba(0, 168, 255, 0.15);
+      color: #00a8ff;
+      border: 1px solid rgba(0, 168, 255, 0.35);
+    }
+
+    /* Дивлюся — Зелений */
+    .tag-watching {
+      background: rgba(46, 213, 115, 0.15);
+      color: #2ed573;
+      border: 1px solid rgba(46, 213, 115, 0.4);
+    }
+
+    /* Переглянуто — Фіолетовий */
+    .tag-completed {
+      background: rgba(138, 112, 214, 0.15);
+      color: #a29bfe;
+      border: 1px solid rgba(138, 112, 214, 0.4);
+    }
+
+    /* Закинув — Червоний */
+    .tag-dropped {
+      background: rgba(255, 107, 129, 0.15);
+      color: #ff6b81;
+      border: 1px solid rgba(255, 107, 129, 0.4);
+    }
+
+    /* Модалка */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -223,10 +261,9 @@
   </div>
 
   <div class="grid" id="anime-grid">
-    <!-- Картки генеруються JS -->
+    <!-- Картки -->
   </div>
 
-  <!-- Модальне вікно (Редагування / Додавання) -->
   <div class="modal-overlay" id="modal">
     <div class="modal">
       <div class="modal-header">
@@ -241,6 +278,15 @@
       </div>
 
       <div class="form-group">
+        <label for="anime-status">Статус перегляду</label>
+        <select id="anime-status" class="form-control">
+          <option value="Переглянуто">Переглянуто</option>
+          <option value="Дивлюся">Дивлюся</option>
+          <option value="Закинув">Закинув</option>
+        </select>
+      </div>
+
+      <div class="form-group">
         <label for="anime-url">Посилання (Anitube / Інше)</label>
         <input type="url" id="anime-url" class="form-control" placeholder="https://anitube.in.ua/...">
       </div>
@@ -251,29 +297,44 @@
         </div>
         <div style="display: flex; gap: 0.5rem;">
           <button class="btn btn-secondary" onclick="closeModal()">Скасувати</button>
-          <button class="btn" onclick="saveAnime()">Зберегти</button>
+          <button class="btn" id="save-btn" onclick="saveAnime()">Зберегти</button>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxa7nwBMJrCxkEDuv-R7wqE5fmgKM-3Ju8K8L3ky3kgmTGjSg4ausZYMC2sQhKoGuuZ/exec'; // Встав сюди своє посилання на Apps Script
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxa7nwBMJrCxkEDuv-R7wqE5fmgKM-3Ju8K8L3ky3kgmTGjSg4ausZYMC2sQhKoGuuZ/exec';
     let animeList = [];
     let isEditMode = false;
 
-    // 1. Завантаження даних з Google Таблиці
     async function loadAnime() {
       try {
         const response = await fetch(SCRIPT_URL);
         animeList = await response.json();
         renderList(animeList);
       } catch (err) {
-        console.error("Помилка при завантаженні:", err);
+        console.error("Помилка завантаження:", err);
       }
     }
 
-    // 2. Рендеринг списку картка
+    function normalizeStatus(status) {
+      if (!status) return 'Переглянуто';
+      const clean = String(status).trim();
+      if (clean === 'Переглянув') return 'Переглянуто';
+      return clean;
+    }
+
+    function getStatusClass(status) {
+      const normalized = normalizeStatus(status);
+      switch (normalized) {
+        case 'Дивлюся': return 'tag-watching';
+        case 'Закинув': return 'tag-dropped';
+        case 'Переглянуто':
+        default: return 'tag-completed';
+      }
+    }
+
     function renderList(list) {
       const grid = document.getElementById('anime-grid');
       grid.innerHTML = '';
@@ -283,30 +344,34 @@
         card.className = 'card';
         
         const hasUrl = anime.url && anime.url.trim() !== '';
+        const statusText = normalizeStatus(anime.status);
+        const statusClass = getStatusClass(statusText);
 
         card.innerHTML = `
           <div class="card-title">${anime.title}</div>
           <div class="card-footer">
-            ${hasUrl ? '<span class="card-badge">Anitube</span>' : '<span></span>'}
+            <div class="badge-group">
+              <span class="card-badge ${statusClass}">${statusText}</span>
+              ${hasUrl ? '<span class="card-badge badge-anitube">Anitube</span>' : ''}
+            </div>
           </div>
         `;
 
-        // Обробка кліку на картку
         card.addEventListener('click', (e) => {
-          // Якщо натиснуто з клавішею Ctrl (або Cmd на Mac) і є посилання — відкриваємо посилання
           if ((e.ctrlKey || e.metaKey) && hasUrl) {
-            window.open(anime.url, '_blank');
+            e.preventDefault();
+            const newWin = window.open(anime.url, '_blank');
+            if (newWin) newWin.focus();
           } else {
-            // Звичайний клік відкриває вікно редагування
             openEditModal(anime);
           }
         });
 
-        // Підтримка відкриття посилання за допомогою кліку колесиком миші (Middle Click)
         card.addEventListener('auxclick', (e) => {
           if (e.button === 1 && hasUrl) {
             e.preventDefault();
-            window.open(anime.url, '_blank');
+            const newWin = window.open(anime.url, '_blank');
+            if (newWin) newWin.focus();
           }
         });
 
@@ -314,30 +379,32 @@
       });
     }
 
-    // 3. Пошук
     function filterAnime() {
       const query = document.getElementById('search').value.toLowerCase();
-      const filtered = animeList.filter(a => a.title.toLowerCase().includes(query));
+      const filtered = animeList.filter(a => 
+        a.title.toLowerCase().includes(query) || 
+        (a.status && String(a.status).toLowerCase().includes(query))
+      );
       renderList(filtered);
     }
 
-    // 4. Відкриття модалки для Додавання
     function openAddModal() {
       isEditMode = false;
       document.getElementById('modal-heading').innerText = "Додати нове аніме";
       document.getElementById('edit-row-index').value = '';
       document.getElementById('anime-title').value = '';
+      document.getElementById('anime-status').value = 'Дивлюся';
       document.getElementById('anime-url').value = '';
       document.getElementById('delete-btn').style.display = 'none';
       document.getElementById('modal').style.display = 'flex';
     }
 
-    // 5. Відкриття модалки для Редагування
     function openEditModal(anime) {
       isEditMode = true;
       document.getElementById('modal-heading').innerText = "Налаштування елемента";
       document.getElementById('edit-row-index').value = anime.rowIndex;
       document.getElementById('anime-title').value = anime.title;
+      document.getElementById('anime-status').value = normalizeStatus(anime.status);
       document.getElementById('anime-url').value = anime.url || '';
       document.getElementById('delete-btn').style.display = 'block';
       document.getElementById('modal').style.display = 'flex';
@@ -347,32 +414,47 @@
       document.getElementById('modal').style.display = 'none';
     }
 
-    // 6. Збереження (Add / Edit)
+    async function sendRequest(payload) {
+      return fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+    }
+
     async function saveAnime() {
       const title = document.getElementById('anime-title').value.trim();
+      const status = document.getElementById('anime-status').value;
       const url = document.getElementById('anime-url').value.trim();
       const rowIndex = document.getElementById('edit-row-index').value;
 
       if (!title) return alert("Введіть назву!");
 
+      const saveBtn = document.getElementById('save-btn');
+      saveBtn.innerText = 'Збереження...';
+      saveBtn.disabled = true;
+
       const payload = {
         action: isEditMode ? 'edit' : 'add',
-        title,
-        url,
-        rowIndex
+        title: title,
+        status: status,
+        url: url,
+        rowIndex: rowIndex
       };
 
-      closeModal();
-
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-
-      loadAnime();
+      try {
+        await sendRequest(payload);
+        closeModal();
+        await loadAnime();
+      } catch (err) {
+        console.error("Помилка:", err);
+        alert("Помилка при збереженні!");
+      } finally {
+        saveBtn.innerText = 'Зберегти';
+        saveBtn.disabled = false;
+      }
     }
 
-    // 7. Видалення
     async function deleteCurrentAnime() {
       const rowIndex = document.getElementById('edit-row-index').value;
       const title = document.getElementById('anime-title').value;
@@ -381,12 +463,12 @@
 
       closeModal();
 
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'delete', rowIndex })
-      });
-
-      loadAnime();
+      try {
+        await sendRequest({ action: 'delete', rowIndex: rowIndex });
+        await loadAnime();
+      } catch (err) {
+        console.error("Помилка при видаленні:", err);
+      }
     }
 
     loadAnime();
