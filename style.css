@@ -1,0 +1,284 @@
+:root {
+    --bg: #090d16;
+    --card-bg: rgba(22, 31, 48, 0.75);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #a5b4fc, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.btn-danger { background: var(--danger); }
+.btn-danger:hover { background: var(--danger-hover); }
+.btn-secondary { background: #334155; }
+.btn-secondary:hover { background: #475569; }
+
+.search-container {
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 13px;
+}
+
+.search-tegs {
+    width: 20%;
+    padding: 0.8rem 1.2rem;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    backdrop-filter: blur(12px);
+    transition: border-color 0.2s;
+}
+.search-input {
+    width: 100%;
+    padding: 0.8rem 1.2rem;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    backdrop-filter: blur(12px);
+    transition: border-color 0.2s;
+}
+.search-input:focus {
+    border-color: var(--accent);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.2rem;
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Картка аніме */
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 1.2rem;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 110px;
+    user-select: none;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(99, 102, 241, 0.1);
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.card-footer {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.badge-group {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Плашки */
+.card-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.54rem;
+    border-radius: 6px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.count-badge {
+  font-size: 1.2rem;
+  color: var(--accent);
+  background: rgba(0, 168, 255, 0.15);
+  border: 1px solid rgba(0, 168, 255, 0.3);
+  padding: 0.2rem 0.6rem;
+  border-radius: 9px;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+}
+
+/* Anitube — Синій */
+.badge-anitube {
+    background: rgba(252, 253, 252, 0.15);
+    color: #69f124;
+    border: 1px solid rgba(198, 225, 239, 0.35);
+}
+
+/* Tg — Синій */
+.badge-tg {
+    background: rgba(11, 135, 197, 0.15);
+    color: #50c5ff;
+    border: 1px solid rgba(0, 168, 255, 0.35);
+}
+
+/* Дивлюся — Фіолетовий */
+.tag-watching {
+    background: rgba(138, 112, 214, 0.15);
+    color: #a29bfe;
+    border: 1px solid rgba(138, 112, 214, 0.4);
+}
+
+/* Переглянуто — Зелений */
+.tag-completed {
+    background: rgba(46, 213, 115, 0.15);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.4);
+}
+
+/* Закинув — Червоний */
+.tag-dropped {
+    background: rgba(255, 107, 129, 0.15);
+    color: #ff6b81;
+    border: 1px solid rgba(255, 107, 129, 0.4);
+}
+
+/* Нові серії — Пурпусний */
+.tag-new-episode {
+    background: rgba(141, 66, 178, 0.15);
+    color: #a452fd;
+    border: 1px solid rgba(159, 88, 204, 0.4);
+}
+
+/* Модалка */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal {
+    background: #1e293b;
+    border: 1px solid var(--card-border);
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: white;
+    font-size: 0.95rem;
+    outline: none;
+    resize: none;
+    scrollbar-width: none;
+}
+.form-control:focus {
+    border-color: var(--accent);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+}
