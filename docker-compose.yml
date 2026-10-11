@@ -7,12 +7,3 @@ services:
     restart: always
     ports:
       - "8099:80"
-  
-  backend:
-    build:
-      context: .
-      dockerfile: dockerfile.backend
-    ports:
-      - "2424:2424"
-    volumes:
-      - ./data:/app/data
