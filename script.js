@@ -1,34 +1,47 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMtmOp3rkQEJJb6mvpuIeL4dOIM377gEzsExRrXUj_c79C0BrHpB3TE1xdIHmcNDWX/exec';
+async function init() {
+    await loadSettings();
+    await loadAnime();
+}
+
+async function loadSettings() {
+    try {
+        const response = await fetch('http://127.0.0.1:8000/loadSetting');
+        setting = await response.json();
+        scriptUrl = setting["SCRIPT_URL"] || '';
+    } catch (err) {
+        console.error("Помилка завантаження налаштувань:", err);
+    }
+}
 
 let animeList = [];
 let isEditMode = false;
 
 async function loadAnime() {
     try {
-    const response = await fetch(SCRIPT_URL);
-    animeList = await response.json();
-    console.log(animeList)
-    renderList(animeList);
+        const response = await fetch(scriptUrl);
+        animeList = await response.json();
+        console.log(animeList);
+        renderList(animeList);
     } catch (err) {
-    console.error("Помилка завантаження:", err);
+        console.error("Помилка завантаження:", err);
     }
 }
 
 function normalizeStatus(status) {
     if (!status) return 'Переглянув';
-    const clean = String(status).trim();
+        const clean = String(status).trim();
     if (clean === 'Переглянув') return 'Переглянув';
-    return clean;
+        return clean;
 }
 
 function getStatusClass(status) {
     const normalized = normalizeStatus(status);
     switch (normalized) {
-    case 'Дивлюся': return 'tag-watching';
-    case 'Закинув': return 'tag-dropped';
-    case 'Нові серії': return 'tag-new-episode';
-    case 'Переглянув':
-    default: return 'tag-completed';
+        case 'Дивлюся': return 'tag-watching';
+        case 'Закинув': return 'tag-dropped';
+        case 'Нові серії': return 'tag-new-episode';
+        case 'Переглянув':
+        default: return 'tag-completed';
     }
 }
 
@@ -53,32 +66,34 @@ function renderList(list) {
         badgeClass = 'badge-tg'
         badgeText = 'Tg'
     } 
-
+ 
     card.innerHTML = `
-        <div class="card-title">${anime.title}</div>
-        <div class="card-footer">
-        <div class="badge-group">
-            <span class="card-badge ${statusClass}">${statusText}</span>
-            ${hasUrl ? `<span class="card-badge ${badgeClass}">${badgeText}</span>` : ''}
+        <div class="card-title">
+            <span>${anime.title}</span>
         </div>
+        <div class="card-footer">
+            <div class="badge-group">
+                <span class="card-badge ${statusClass}">${statusText}</span>
+                ${hasUrl ? `<span class="card-badge ${badgeClass}">${badgeText}</span>` : ''}
+            </div>
         </div>
     `;
 
     card.addEventListener('click', (e) => {
         if ((e.ctrlKey || e.metaKey) && hasUrl) {
-        e.preventDefault();
-        const newWin = window.open(anime.url, '_blank');
-        if (newWin) newWin.focus();
+            e.preventDefault();
+            const newWin = window.open(anime.url, '_blank');
+            if (newWin) newWin.focus();
         } else {
-        openEditModal(anime);
+            openEditModal(anime);
         }
     });
 
     card.addEventListener('auxclick', (e) => {
         if (e.button === 1 && hasUrl) {
-        e.preventDefault();
-        const newWin = window.open(anime.url, '_blank');
-        if (newWin) newWin.focus();
+            e.preventDefault();
+            const newWin = window.open(anime.url, '_blank');
+            if (newWin) newWin.focus();
         }
     });
 
@@ -149,15 +164,15 @@ function openEditModal(anime) {
     document.getElementById('modal').style.display = 'flex';
 }
 
-function closeModal() {
-    document.getElementById('modal').style.display = 'none';
+function closeModal(modal) {
+    document.getElementById(modal).style.display = 'none';
 }
 
 async function sendRequest(payload) {
-    return fetch(SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payload)
+    return fetch(scriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
     });
 }
 
@@ -175,24 +190,24 @@ async function saveAnime() {
     saveBtn.disabled = true;
 
     const payload = {
-    action: isEditMode ? 'edit' : 'add',
-    title: title,
-    status: status,
-    url: url,
-    description: description,
-    rowIndex: rowIndex
+        action: isEditMode ? 'edit' : 'add',
+        title: title,
+        status: status,
+        url: url,
+        description: description,
+        rowIndex: rowIndex
     };
 
     try {
-    await sendRequest(payload);
-    closeModal();
-    await loadAnime();
+        await sendRequest(payload);
+        closeModal('modal');
+        await loadAnime();
     } catch (err) {
-    console.error("Помилка:", err);
-    alert("Помилка при збереженні!");
+        console.error("Помилка:", err);
+        alert("Помилка при збереженні!");
     } finally {
-    saveBtn.innerText = 'Зберегти';
-    saveBtn.disabled = false;
+        saveBtn.innerText = 'Зберегти';
+        saveBtn.disabled = false;
     }
 }
 
@@ -205,11 +220,49 @@ async function deleteCurrentAnime() {
     closeModal();
 
     try {
-    await sendRequest({ action: 'delete', rowIndex: rowIndex });
-    await loadAnime();
+        await sendRequest({ action: 'delete', rowIndex: rowIndex });
+        await loadAnime();
     } catch (err) {
-    console.error("Помилка при видаленні:", err);
+        console.error("Помилка при видаленні:", err);
     }
 }
 
-loadAnime();
+init()
+
+const seasonInput = document.getElementById('select-season');
+
+if (seasonInput) {
+    seasonInput.addEventListener('wheel', (e) => {
+        // Відключаємо стандартну прокрутку сторінки при наведенні на інпут
+        e.preventDefault();
+
+        let currentValue = parseInt(seasonInput.value) || 1;
+        const min = parseInt(seasonInput.min) || 1;
+        const max = parseInt(seasonInput.max) || 99;
+
+        // Якщо скролимо вгору (e.deltaY < 0) — збільшуємо, якщо вниз — зменшуємо
+        if (e.deltaY < 0) {
+            if (currentValue < max) currentValue++;
+        } else {
+            if (currentValue > min) currentValue--;
+        }
+
+        seasonInput.value = currentValue;
+    });
+}
+
+function openSettin() {
+    document.getElementById('modal-setting').style.display = 'flex';
+    document.getElementById('apps-script').value = scriptUrl;
+}
+
+function saveSetting() {
+    setting["SCRIPT_URL"] = document.getElementById('apps-script').value;
+    fetch('http://127.0.0.1:8000/saveSetting', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(setting)
+    });
+    closeModal('modal-setting');
+    loadAnime();
+}

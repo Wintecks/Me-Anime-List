@@ -8,10 +8,14 @@
   <link rel="icon" type="image/png" href="icom.png">
 </head>
 <body>
+  <script src="script.js"></script>
 
   <header>
     <h1>Me Anime List:<span id="anime-count" class="count-badge">0</span></h1>
-    <button class="btn" onclick="openAddModal()">+ Додати аніме</button>
+    <div>
+      <button class="btn" onclick="openAddModal()">+ Додати аніме</button>
+      <button class="btn" onclick="openSettin()">Налаштування</button>
+    </div>
   </header>
 
   <div class="search-container">
@@ -43,13 +47,13 @@
       </div>
 
       <div class="form-group">
-        <label for="anime-status">Статус перегляду</label>
-        <select id="anime-status" class="form-control">
-          <option value="Переглянув">Переглянув</option>
-          <option value="Дивлюся">Дивлюся</option>
-          <option value="Закинув">Закинув</option>
-          <option value="Нові серії">Нові серії</option>
-        </select>
+            <label for="anime-status">Статус перегляду</label>
+            <select id="anime-status" class="form-control">
+              <option value="Переглянув">Переглянув</option>
+              <option value="Дивлюся">Дивлюся</option>
+              <option value="Закинув">Закинув</option>
+              <option value="Нові серії">Нові серії</option>
+            </select>
       </div>
 
       <div class="form-group">
@@ -67,12 +71,26 @@
           <button class="btn btn-danger" id="delete-btn" onclick="deleteCurrentAnime()">Видалити</button>
         </div>
         <div style="display: flex; gap: 0.5rem;">
-          <button class="btn btn-secondary" onclick="closeModal()">Скасувати</button>
+          <button class="btn btn-secondary" onclick="closeModal('modal')">Скасувати</button>
           <button class="btn" id="save-btn" onclick="saveAnime()">Зберегти</button>
         </div>
       </div>
     </div>
   </div>
-  <script src="script.js"></script>
+
+  <div class="modal-overlay" id="modal-setting">
+    <div class="modal">
+      <div class="form-group">
+        <label for="apps-script">Посилання на Apps Script</label>
+        <input type="url" id="apps-script" class="form-control" placeholder="https://script.google.com">
+      </div>
+
+      <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-secondary" onclick="closeModal('modal-setting')">Скасувати</button>
+          <button class="btn" id="save-btn" onclick="saveSetting()">Зберегти</button>
+        </div>
+    </div>
+  </div>
+  </div>
 </body>
 </html>
