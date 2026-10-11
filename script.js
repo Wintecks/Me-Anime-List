@@ -1,14 +1,26 @@
-let SCRIPT_URL = localStorage.getItem('SCRIPT_URL');
-console.log(localStorage.getItem('SCRIPT_URL'));
+async function init() {
+    await loadSettings();
+    await loadAnime();
+}
+
+async function loadSettings() {
+    try {
+        const response = await fetch('http://127.0.0.1:2424/loadSetting');
+        setting = await response.json();
+        scriptUrl = setting["SCRIPT_URL"] || '';
+    } catch (err) {
+        console.error("Помилка завантаження налаштувань:", err);
+    }
+}
 
 let animeList = [];
 let isEditMode = false;
 
 async function loadAnime() {
     try {
-        const response = await fetch(SCRIPT_URL);
+        const response = await fetch(scriptUrl);
         animeList = await response.json();
-        console.log(animeList)
+        console.log(animeList);
         renderList(animeList);
     } catch (err) {
         console.error("Помилка завантаження:", err);
@@ -157,7 +169,7 @@ function closeModal(modal) {
 }
 
 async function sendRequest(payload) {
-    return fetch(SCRIPT_URL, {
+    return fetch(scriptUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
@@ -215,7 +227,7 @@ async function deleteCurrentAnime() {
     }
 }
 
-loadAnime();
+init()
 
 const seasonInput = document.getElementById('select-season');
 
@@ -241,12 +253,16 @@ if (seasonInput) {
 
 function openSettin() {
     document.getElementById('modal-setting').style.display = 'flex';
-    document.getElementById('apps-script').value = localStorage.getItem('SCRIPT_URL');
+    document.getElementById('apps-script').value = scriptUrl;
 }
 
 function saveSetting() {
-    SCRIPT_URL = document.getElementById('apps-script').value;
-    localStorage.setItem('SCRIPT_URL', SCRIPT_URL);
+    setting["SCRIPT_URL"] = document.getElementById('apps-script').value;
+    fetch('http://127.0.0.1:2424/saveSetting', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(setting)
+    });
     closeModal('modal-setting');
     loadAnime();
 }
