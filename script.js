@@ -24,6 +24,7 @@ async function loadAnime() {
         console.log(animeList);
     } catch (err) {
         console.error("Помилка завантаження:", err);
+        animeList = [];
     }
     renderList(animeList);
 }

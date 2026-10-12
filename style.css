@@ -32,6 +32,11 @@ header {
     margin-bottom: 2rem;
 }
 
+.header-btn-cont {
+    display: flex;
+    gap: 7px;
+}
+
 h1 {
     font-size: 1.8rem;
     font-weight: 700;
@@ -316,4 +321,10 @@ input[type="number"]::-webkit-inner-spin-button {
 .last-seson-episode {
     display: flex;
     gap: 10px;
+}
+
+@media (max-width: 570px) {
+    .search-tegs {
+        width: 90%;
+    }
 }
