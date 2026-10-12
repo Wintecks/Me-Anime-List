@@ -259,7 +259,8 @@ function openSettin() {
 }
 
 function saveSetting() {
-    setting["SCRIPT_URL"] = document.getElementById('apps-script').value;
+    scriptUrl = document.getElementById('apps-script').value;
+    setting["SCRIPT_URL"] = scriptUrl
     fetch(`${backendUrl}/saveSetting`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
