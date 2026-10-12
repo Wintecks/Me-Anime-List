@@ -5,7 +5,7 @@ async function init() {
 
 async function loadSettings() {
     try {
-        const response = await fetch('http://127.0.0.1:2424/loadSetting');
+        const response = await fetch('http://localhost:2424/loadSetting');
         setting = await response.json();
         scriptUrl = setting["SCRIPT_URL"] || '';
     } catch (err) {
@@ -258,7 +258,7 @@ function openSettin() {
 
 function saveSetting() {
     setting["SCRIPT_URL"] = document.getElementById('apps-script').value;
-    fetch('http://127.0.0.1:2424/saveSetting', {
+    fetch('http://localhost/saveSetting', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(setting)
