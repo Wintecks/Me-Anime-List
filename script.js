@@ -258,7 +258,6 @@ function openSettin() {
     document.getElementById('apps-script').value = scriptUrl;
 }
 
-// Збереження налаштувань
 function saveSetting() {
     scriptUrl = document.getElementById('apps-script').value;
     setting["SCRIPT_URL"] = scriptUrl
