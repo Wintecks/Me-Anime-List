@@ -1,4 +1,6 @@
 const backendUrl = `http://${window.location.hostname}:2424`;
+let animeList = [];
+let isEditMode = false;
 
 async function init() {
     await loadSettings();
@@ -15,18 +17,15 @@ async function loadSettings() {
     }
 }
 
-let animeList = [];
-let isEditMode = false;
-
 async function loadAnime() {
     try {
         const response = await fetch(scriptUrl);
         animeList = await response.json();
         console.log(animeList);
-        renderList(animeList);
     } catch (err) {
         console.error("Помилка завантаження:", err);
     }
+    renderList(animeList);
 }
 
 function normalizeStatus(status) {
